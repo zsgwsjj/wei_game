@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<link rel="icon" href="img/游戏.png" sizes="32x32">
+		<title>小游戏</title>
+		<script src="js/jquery-3.3.1.js" type="text/javascript" charset="utf-8"></script>
+		<style type="text/css">
+			*{
+				padding: 0px;
+				margin: 0px;
+			}
+			.npc{
+				height: 64px;
+				width: 48px;
+				position: absolute;
+				background:url(img/bg.png) ;
+				background-position: 0px 0px;"
+			}
+			#miss{
+				font-size:14px;
+				height: 21px;
+				position: absolute;
+				display: none;
+				z-index: 3;
+			}
+		</style>
+	</head>
+
+	<body onkeydown="movediv(event,this)">
+		<div style="background: lightgray;height: 64px;line-height: 64px;">
+				键盘上下左右控制人物移动，回车(Enter)键攻击，鼠标停留可查看属性。每击杀一名NPC，攻击力加10。
+				<button type="button" name="npc">新建NPC</button>
+				<!-- <button type="button" id="showkg">显示宽高</button> -->
+		</div>
+		<div id="play">
+
+
+			<div id="npc0" class="npc" style="top:264px;left:248px;" defend=90 hp=200 title="防御:90,生命:200" >
+
+			</div>
+			<div id="miss">
+				miss
+			</div>
+			<div id="con" style="height: 64px;
+					width: 48px;
+					background: red;
+					position: absolute;
+					top:64px;
+					left:0px;
+					background:url(img/bg.png) ; 
+					background-position: 0px 0px;
+					z-index: 2;" title="攻击力:100">
+			</div>
+		</div>
+	</body>
+	<script type="text/javascript">
+		//获取屏幕可用宽高
+		var w=window.screen.availWidth;
+		var h=window.screen.availHeight;
+
+		//获取人物
+		var con=document.getElementById("con");
+
+		//改变人物模型
+		function Person(face,name,attack){
+			this.face=face;
+			this.attack=attack;
+			document.getElementById(name).style.backgroundImage="url(img/"+face+")";
+		}
+		var person=new Person("moushi.png","con",100);
+
+		//点击新建npc
+		var i=1;
+		$(":button[name=npc]").click(function(){
+
+			if($(".npc").length <50){
+			  if($(".npc").length==0){
+					i=0;
+				}
+				var npcId="npc"+i;
+				var newnpc="<div class='npc' id='"+npcId+"'></div>";
+				var top=Math.floor(Math.random() * ((h-150) - 64)) + 64;
+				var left=Math.floor(Math.random() * ((w-48) - 0)) + 0;
+				var defend=Math.floor(Math.random() * (200-20)) + 20;
+				var hp=Math.floor(Math.random() * (1000-200)) + 200;
+				$("#play").append(newnpc);
+				$("#"+npcId).css({"top":top+"px","left":left+"px"});
+				$("#"+npcId).attr("defend",defend);
+				$("#"+npcId).attr("hp",hp);
+				$("#"+npcId).attr("title","防御:"+defend+",生命:"+hp);
+				i++;
+			}
+			else{
+				alert("npc够多啦！");
+			}
+			this.blur();
+
+		});
+
+		//攻击计算
+		function attack(oldPosTop){
+			var conTop=parseInt($("#con").css("top"));
+			var conLeft=parseInt($("#con").css("left"));
+			$(".npc").each(function(obj){
+			npcTop=parseInt($(this).css("top"));
+			npcLeft=parseInt($(this).css("left"));
+			var tj="";
+			switch (oldPosTop){
+				case "0px":
+					tj=conTop>(npcTop-64) && conTop<npcTop && conLeft>(npcLeft-24) && conLeft<(npcLeft+24);
+					console.log(tj,conTop,npcTop);
+					break;
+				case "-64px":
+					tj=conTop>(npcTop-32) && conTop<(npcTop+32) && conLeft>npcLeft && conLeft<(npcLeft+48);
+					break;
+				case "-128px":
+					tj=conTop>(npcTop-32) && conTop<(npcTop+32) && conLeft>(npcLeft-48) && conLeft<(npcLeft+24);
+
+					break;
+				case "-192px":
+				  tj=conTop>npcTop && conTop<(npcTop+64) && conLeft>(npcLeft-24) && conLeft<(npcLeft+24);
+					break;
+			}
+			if(tj && $(this).css("opacity")==1){
+		    console.log(person.attack);
+				defend=$(this).attr("defend");
+				hp=$(this).attr("hp");
+				if(person.attack>defend){
+					hp=hp-(person.attack-defend);
+					$(this).attr("title","防御:"+defend+",生命:"+hp);
+					$(this).attr("hp",hp);
+					$("#miss").css({"top":npcTop-20,"left":npcLeft+20});
+					$("#miss").html("-"+(person.attack-defend));
+					$("#miss").fadeIn(200);
+					$("#miss").fadeOut(5);
+					if($(this).attr("hp")<=0){
+						$(this).fadeOut(1500,function(){
+							$(this).remove();
+						});
+						person.attack+=10;
+						$("#con").attr("title","攻击力:"+person.attack);
+					}
+				}
+				else{
+					$("#miss").css({"top":npcTop-20,"left":npcLeft+20});
+					$("#miss").html("太肉了打不动啊");
+					$("#miss").fadeIn(200);
+					$("#miss").fadeOut(5);
+				}
+				}
+
+			});
+
+		}
+		//npc属性设定
+// 		function Npc(defend,hp){
+// 			this.defend=defend;
+// 			this.hp=hp;
+// 		}
+// 		var npc1=new Npc(90,200);
+
+		//移动人物
+		function movediv(e,obj){
+
+			var oldTop=parseInt(con.style.top);
+			var oldLeft=parseInt(con.style.left);
+			var oldPos=con.style.backgroundPosition.split(" ");
+			var oldPosLeft=oldPos[0];
+			var oldPosTop=oldPos[1];
+
+
+			if(e.code=="Enter")
+			{
+
+				if(con.style.width=="48px"){
+				con.style.width="64px";
+				oldPosLeft="0px";
+				}
+
+				con.style.backgroundImage="url(img/attack.png)";
+				var attackLeft="";
+				var tj="";
+				attackLeft=parseInt(oldPosLeft)-64+"px";
+				//下攻击
+				if(oldPosTop=="0px"){
+					con.style.backgroundPosition=attackLeft+" 0px";
+					attack(oldPosTop);
+
+				}
+				//上攻击
+				if(oldPosTop=="-192px"){
+					con.style.backgroundPosition=attackLeft+" -192px";
+					attack(oldPosTop);
+				}
+				//左攻击
+				if(oldPosTop=="-64px"){
+					con.style.backgroundPosition=attackLeft+" -64px";
+					attack(oldPosTop);
+				}
+				//右攻击
+				if(oldPosTop=="-128px"){
+					con.style.backgroundPosition=attackLeft+" -128px";
+					attack(oldPosTop);
+				}
+
+			}
+			else{
+			    if(con.style.width=="64px"){
+					con.style.width="48px";
+					oldPosLeft="0px";
+				}
+				var nowPosLeft=parseInt(oldPosLeft)-48+"px";
+
+				con.style.backgroundImage="url(img/moushi.png)";
+				if(e.code=="ArrowDown" )
+				{
+					con.style.top=oldTop+10+"px";
+					con.style.backgroundPosition=nowPosLeft+" 0px";
+
+				}
+				if(e.code=="ArrowUp" && oldTop>64)
+				{
+					con.style.top=oldTop-10+"px";
+					con.style.backgroundPosition=nowPosLeft+" -192px";
+				}
+				if(e.code=="ArrowLeft" && oldLeft!=0)
+				{
+					con.style.left=oldLeft-10+"px";
+					con.style.backgroundPosition=nowPosLeft+" -64px";
+				}
+
+				if(e.code=="ArrowRight" )
+				{
+					con.style.left=oldLeft+10+"px";
+					con.style.backgroundPosition=nowPosLeft+" -128px";
+				}
+
+			}
+
+		}
+
+	</script>
+</html>
