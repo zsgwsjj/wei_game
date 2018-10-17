@@ -16,7 +16,7 @@
 				width: 48px;
 				position: absolute;
 				background:url(img/bg.png) ;
-				background-position: 0px 0px;"
+				background-position: 0px 0px;
 			}
 			#miss{
 				font-size:14px;
@@ -110,7 +110,7 @@
 			switch (oldPosTop){
 				case "0px":
 					tj=conTop>(npcTop-64) && conTop<npcTop && conLeft>(npcLeft-24) && conLeft<(npcLeft+24);
-					console.log(tj,conTop,npcTop);
+					
 					break;
 				case "-64px":
 					tj=conTop>(npcTop-32) && conTop<(npcTop+32) && conLeft>npcLeft && conLeft<(npcLeft+48);
@@ -124,7 +124,7 @@
 					break;
 			}
 			if(tj && $(this).css("opacity")==1){
-		    console.log(person.attack);
+		
 				defend=$(this).attr("defend");
 				hp=$(this).attr("hp");
 				if(person.attack>defend){
